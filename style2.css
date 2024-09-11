@@ -71,7 +71,7 @@ th {
   color: white;
   transition: background 0.3s ease, transform 0.3s ease;
 }
-.pagination-button {
+.pagination-button,.sort-btn {
   font-size: 1.1rem;
   border: none;
   padding: 0.5rem;
@@ -81,7 +81,18 @@ th {
   background: #007bff;
   color: white;
   height: 2.5rem;
-
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.sort-btn{
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  margin: 15px;
+  width: 10rem;
+  border-radius: 0.2rem;
+  background: #007bff;
+  color: white;
+  height: 2.5rem;
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
@@ -132,6 +143,7 @@ th {
   height: 40px;
   padding: 0 40px 0 20px;
   outline: none;
+  margin-left: 10px;
   border: none;
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -158,6 +170,7 @@ th {
   cursor: pointer;
   border-radius: 0.2rem;
   color: #007bff;
+  padding: 10px;
   background-color: white;
   transition: color 0.3s ease, transform 0.3s ease;
 }
@@ -165,4 +178,9 @@ th {
 .search-header:hover {
   color: #0056b3;
   transform: scale(1.05);
+}
+
+.sort-btns
+{
+  display: flex;
 }

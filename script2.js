@@ -4,11 +4,19 @@ const nextButton = document.getElementById("next-button");
 const prevButton = document.getElementById("prev-button");
 const search = document.getElementById("search");
 const select = document.getElementById("select-1");
+const sort = document.getElementById("sort-btn");
+const sortDsc = document.getElementById("sort-btn-2");
+
 
 let paginationLimit = 10;
 let currentPage = 1;
 let arr = [];
 let filteredData = [];
+let val = false;
+let orgData = [];
+let filData = [];
+let sortAsc = true;
+let sortDsec = true;
 
 const appendPageNumber = (index) => {
   const button = document.createElement("button");
@@ -17,14 +25,12 @@ const appendPageNumber = (index) => {
   button.setAttribute("page-index", index);
   paginationNumbers.appendChild(button);
 };
-
 const appendDots = () => {
   const dots = document.createElement("span");
   dots.className = "span-dots";
   dots.innerHTML = "...";
   paginationNumbers.appendChild(dots);
 };
-
 const handleActivePageNumber = (index) => {
   document.querySelectorAll(".pagination-number").forEach((button) => {
     button.classList.toggle(
@@ -33,7 +39,6 @@ const handleActivePageNumber = (index) => {
     );
   });
 };
-
 const clickButton = () => {
   document.querySelectorAll(".pagination-number").forEach((button) => {
     button.addEventListener("click", () => {
@@ -46,30 +51,34 @@ const clickButton = () => {
     });
   });
 };
-
 const updatePagination = () => {
   const pages = numberOfPages();
   paginationNumbers.innerHTML = "";
+
+  const appendPageNumbers = (start, end) => {
+    for (let i = start; i <= end; i++) appendPageNumber(i);
+  };
+
   if (pages <= 5) {
-    for (let i = 1; i <= pages; i++) appendPageNumber(i);
+    appendPageNumbers(1, pages);
   } else {
     if (currentPage <= 3) {
-      for (let i = 1; i <= 4; i++) appendPageNumber(i);
+      appendPageNumbers(1, 4);
       appendDots();
       appendPageNumber(pages);
     } else if (currentPage >= pages - 2) {
       appendPageNumber(1);
       appendDots();
-      for (let i = pages - 3; i <= pages; i++) appendPageNumber(i);
+      appendPageNumbers(pages - 3, pages);
     } else {
       appendPageNumber(1);
       appendDots();
-      for (let i = currentPage - 1; i <= currentPage + 1; i++)
-        appendPageNumber(i);
+      appendPageNumbers(currentPage - 1, currentPage + 1);
       appendDots();
       appendPageNumber(pages);
     }
   }
+
   handleActivePageNumber(currentPage);
   clickButton();
 };
@@ -92,16 +101,69 @@ const renderTable = () => {
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit
   );
-  fetchedData.innerHTML = paginatedItems.map((item, index) => `<tr>
+  fetchedData.innerHTML = paginatedItems
+    .map(
+      (item, index) => `<tr>
       <td>${(currentPage - 1) * paginationLimit + index + 1}</td>
       <td>${item.id}</td>
       <td>${item.userId}</td>
       <td>${item.title.slice(0, 30)}</td>
       <td>${item.body.slice(0, 30)}</td>
-    </tr>`).join("");
+    </tr>`
+    )
+    .join("");
 
   prevButton.disabled = currentPage === 1;
   nextButton.disabled = currentPage >= numberOfPages();
+};
+
+const sortDataAsc = () => {
+  if (!val) {
+    orgData = [...arr];
+    arr.sort((a, b) =>
+      sortAsc ?
+      a.title.localeCompare(b.title) :
+      b.title.localeCompare(a.title)
+    );
+
+    filteredData = arr.filter((item) =>
+      item.title.toLowerCase().includes(search.value.toLowerCase())
+    );
+    sort.innerHTML = "UnsortAsc";
+  } else {
+    arr = [...orgData];
+    filteredData = arr.filter((item) =>
+      item.title.toLowerCase().includes(search.value.toLowerCase())
+    );
+    sort.innerHTML = "SortAsc";
+  }
+  val = !val;
+  sortAsc = !sortAsc;
+  renderTable();
+};
+const sortDataDsc = () => {
+  if (!val) {
+    orgData = [...arr];
+    arr.sort((a, b) =>
+      sortDsec ?
+      b.title.localeCompare(a.title) :
+      a.title.localeCompare(b.title)
+    );
+
+    filteredData = arr.filter((item) =>
+      item.title.toLowerCase().includes(search.value.toLowerCase())
+    );
+    sortDsc.innerHTML = "UnsortDsc";
+  } else {
+    arr = [...orgData];
+    filteredData = arr.filter((item) =>
+      item.title.toLowerCase().includes(search.value.toLowerCase())
+    );
+    sortDsc.innerHTML = "SortDsc";
+  }
+  val = !val;
+  sortDsec = !sortDsec;
+  renderTable();
 };
 
 const numberOfPages = () => Math.ceil(filteredData.length / paginationLimit);
@@ -120,7 +182,9 @@ const next = () => {
   }
 };
 const filterData = (e) => {
-  filteredData = arr.filter((item) => item.title.toLowerCase().includes(e.target.value.toLowerCase()));
+  filteredData = arr.filter((item) =>
+    item.title.toLowerCase().includes(e.target.value.toLowerCase())
+  );
   currentPage = 1;
   renderTable();
   updatePagination();
@@ -137,3 +201,6 @@ nextButton.addEventListener("click", next);
 select.addEventListener("change", selectOption);
 window.addEventListener("load", fetchData);
 search.addEventListener("input", filterData);
+sort.addEventListener("click", sortDataAsc);
+sortDsc.addEventListener("click", sortDataDsc);
+
