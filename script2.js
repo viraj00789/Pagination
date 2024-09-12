@@ -4,19 +4,14 @@ const nextButton = document.getElementById("next-button");
 const prevButton = document.getElementById("prev-button");
 const search = document.getElementById("search");
 const select = document.getElementById("select-1");
-const sort = document.getElementById("sort-btn");
-const sortDsc = document.getElementById("sort-btn-2");
-
+const sortButton = document.getElementById("sort-btn");
 
 let paginationLimit = 10;
 let currentPage = 1;
 let arr = [];
 let filteredData = [];
-let val = false;
 let orgData = [];
-let filData = [];
-let sortAsc = true;
-let sortDsec = true;
+let sortState = 'none'; 
 
 const appendPageNumber = (index) => {
   const button = document.createElement("button");
@@ -25,12 +20,14 @@ const appendPageNumber = (index) => {
   button.setAttribute("page-index", index);
   paginationNumbers.appendChild(button);
 };
+
 const appendDots = () => {
   const dots = document.createElement("span");
   dots.className = "span-dots";
   dots.innerHTML = "...";
   paginationNumbers.appendChild(dots);
 };
+
 const handleActivePageNumber = (index) => {
   document.querySelectorAll(".pagination-number").forEach((button) => {
     button.classList.toggle(
@@ -39,6 +36,7 @@ const handleActivePageNumber = (index) => {
     );
   });
 };
+
 const clickButton = () => {
   document.querySelectorAll(".pagination-number").forEach((button) => {
     button.addEventListener("click", () => {
@@ -51,6 +49,7 @@ const clickButton = () => {
     });
   });
 };
+
 const updatePagination = () => {
   const pages = numberOfPages();
   paginationNumbers.innerHTML = "";
@@ -82,13 +81,16 @@ const updatePagination = () => {
   handleActivePageNumber(currentPage);
   clickButton();
 };
+
 const fetchData = async () => {
   const response = await fetch("https://jsonplaceholder.typicode.com/posts");
   arr = await response.json();
+  orgData = [...arr];
   filteredData = arr;
   updatePagination();
   renderTable();
 };
+
 const renderTable = () => {
   if (!filteredData.length && search.value) {
     fetchedData.innerHTML = "<tr><td colspan='5'>No data found</td></tr>";
@@ -117,56 +119,34 @@ const renderTable = () => {
   nextButton.disabled = currentPage >= numberOfPages();
 };
 
-const sortDataAsc = () => {
-  if (!val) {
-    orgData = [...arr];
-    arr.sort((a, b) =>
-      sortAsc ?
-      a.title.localeCompare(b.title) :
-      b.title.localeCompare(a.title)
-    );
-
-    filteredData = arr.filter((item) =>
-      item.title.toLowerCase().includes(search.value.toLowerCase())
-    );
-    sort.innerHTML = "UnsortAsc";
-  } else {
-    arr = [...orgData];
-    filteredData = arr.filter((item) =>
-      item.title.toLowerCase().includes(search.value.toLowerCase())
-    );
-    sort.innerHTML = "SortAsc";
+const sortData = () => {
+  if (sortState === 'none') {
+    sortState = 'asc';
+    sortButton.innerHTML = "Sort Desc";
+  } else if (sortState === 'asc') {
+    sortState = 'desc';
+    sortButton.innerHTML = "Sort Normal";
+  } else if (sortState === 'desc') {
+    sortState = 'none';
+    sortButton.innerHTML = "Sort Asc";
+    arr = [...orgData]; 
   }
-  val = !val;
-  sortAsc = !sortAsc;
-  renderTable();
-};
-const sortDataDsc = () => {
-  if (!val) {
-    orgData = [...arr];
-    arr.sort((a, b) =>
-      sortDsec ?
-      b.title.localeCompare(a.title) :
-      a.title.localeCompare(b.title)
-    );
 
-    filteredData = arr.filter((item) =>
-      item.title.toLowerCase().includes(search.value.toLowerCase())
-    );
-    sortDsc.innerHTML = "UnsortDsc";
-  } else {
-    arr = [...orgData];
-    filteredData = arr.filter((item) =>
-      item.title.toLowerCase().includes(search.value.toLowerCase())
-    );
-    sortDsc.innerHTML = "SortDsc";
+  if (sortState === 'asc') {
+    arr.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortState === 'desc') {
+    arr.sort((a, b) => b.title.localeCompare(a.title));
   }
-  val = !val;
-  sortDsec = !sortDsec;
+
+  filteredData = arr.filter((item) =>
+    item.title.toLowerCase().includes(search.value.toLowerCase())
+  );
   renderTable();
+  updatePagination();
 };
 
 const numberOfPages = () => Math.ceil(filteredData.length / paginationLimit);
+
 const prev = () => {
   if (currentPage > 1) {
     currentPage--;
@@ -174,6 +154,7 @@ const prev = () => {
     updatePagination();
   }
 };
+
 const next = () => {
   if (currentPage < numberOfPages()) {
     currentPage++;
@@ -181,6 +162,7 @@ const next = () => {
     updatePagination();
   }
 };
+
 const filterData = (e) => {
   filteredData = arr.filter((item) =>
     item.title.toLowerCase().includes(e.target.value.toLowerCase())
@@ -189,6 +171,7 @@ const filterData = (e) => {
   renderTable();
   updatePagination();
 };
+
 const selectOption = () => {
   paginationLimit = Number(select.value);
   currentPage = 1;
@@ -201,6 +184,5 @@ nextButton.addEventListener("click", next);
 select.addEventListener("change", selectOption);
 window.addEventListener("load", fetchData);
 search.addEventListener("input", filterData);
-sort.addEventListener("click", sortDataAsc);
-sortDsc.addEventListener("click", sortDataDsc);
-
+sortButton.addEventListener("click", sortData);
+sortButton.innerHTML = "Sort Asc";
